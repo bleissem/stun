@@ -1,5 +1,5 @@
 using BBuffer;
-using STUN.Crypto;
+using HashUtils;
 using STUN.Message.Enums;
 
 namespace STUN.Message.Attributes {
@@ -21,7 +21,7 @@ namespace STUN.Message.Attributes {
 			int count = buffer.Position;
 			STUNTypeLengthValue.WriteTypeLength(TYPE, HMAC_LENGTH, ref buffer);
 			STUNMessageBuilder.UpdateHeaderAttributesLength(ref buffer, buffer.Position + HMAC_LENGTH);
-			HMAC_SHA1.ComputeHash(key, new ByteBuffer(buffer.data, buffer.absOffset, count), buffer.data, buffer.absPosition);
+			HMAC_SHA1.ComputeHmacSha1(key, new ByteBuffer(buffer.data, buffer.absOffset, count), buffer.data, buffer.absPosition);
 			buffer.Position += HMAC_LENGTH;
 			buffer.Pad4();
 		}

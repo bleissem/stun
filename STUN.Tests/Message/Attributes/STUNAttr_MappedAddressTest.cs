@@ -27,14 +27,14 @@ namespace STUN.Message.Attributes {
 			CollectionAssert.AreEqual(expected, stunReq.ToArray());
 
 			var attrs = new List<STUNAttr>();
-			var parser = new STUNMessageParser(stunReq, attrs);
+			var parser = new STUNMessageParser(stunReq, false, attrs);
 			Assert.IsTrue(parser.isValid);
 
 			STUNAttr_MappedAddress parsedAddr = new STUNAttr_MappedAddress();
 			parsedAddr.ReadFromBuffer(attrs[0]);
-			Assert.AreEqual(usedPort, parsedAddr.port, "Parser can't read the address correctly");
+			Assert.AreEqual(usedPort, parsedAddr.port, "Parser can't read the port correctly");
 			Assert.IsTrue(parsedAddr.isIPv4());
-			Assert.AreEqual(usedAddress, parsedAddr.ipv4.ToIPAddress(), "Parser can't read the port correctly");
+			Assert.AreEqual(usedAddress, parsedAddr.ip.ToIPAddress(), "Parser can't read the address correctly");
 		}
 
 		[Test]
@@ -61,14 +61,14 @@ namespace STUN.Message.Attributes {
 			CollectionAssert.AreEqual(expected, stunReq.ToArray());
 
 			var attrs = new List<STUNAttr>();
-			var parser = new STUNMessageParser(stunReq, attrs);
+			var parser = new STUNMessageParser(stunReq, false, attrs);
 			Assert.IsTrue(parser.isValid);
 
 			STUNAttr_MappedAddress parsedAddr = new STUNAttr_MappedAddress();
 			parsedAddr.ReadFromBuffer(attrs[0]);
-			Assert.AreEqual(usedPort, parsedAddr.port, "Parser can't read the address correctly");
+			Assert.AreEqual(usedPort, parsedAddr.port, "Parser can't read the port correctly");
 			Assert.IsFalse(parsedAddr.isIPv4());
-			Assert.AreEqual(usedAddress, parsedAddr.ipv6.ToIPAddress(), "Parser can't read the port correctly");
+			Assert.AreEqual(usedAddress, parsedAddr.ip.ToIPAddress(), "Parser can't read the address correctly");
 		}
 	}
 }

@@ -1,7 +1,7 @@
 using BBuffer;
+using NoGcSockets;
 using STUN.Message.Enums;
 using STUN.Utils;
-using System;
 using System.Net;
 
 namespace STUN.Message.Attributes {
@@ -9,27 +9,22 @@ namespace STUN.Message.Attributes {
 		public const STUNAttribute TYPE = STUNAttribute.MAPPED_ADDRESS;
 
 		public ushort port;
-		public IPv4Holder ipv4;
-		public IPv6Holder ipv6;
+		public IPHolder ip;
 		private AddressFamily family;
 
 		public STUNAttr_MappedAddress(IPEndPoint endPoint) : this(endPoint.Address, (ushort) endPoint.Port) { }
+		public STUNAttr_MappedAddress(IPEndPointStruct endPoint) {
+			this = new STUNAttr_MappedAddress(endPoint.ip, endPoint.port);
+		}
 
 		public STUNAttr_MappedAddress(IPAddress address, ushort port) {
-			switch (address.AddressFamily) {
-				case System.Net.Sockets.AddressFamily.InterNetwork:
-					family = AddressFamily.IPv4;
-					ipv4 = new IPv4Holder(address);
-					ipv6 = new IPv6Holder();
-					break;
-				case System.Net.Sockets.AddressFamily.InterNetworkV6:
-					family = AddressFamily.IPv6;
-					ipv4 = new IPv4Holder();
-					ipv6 = new IPv6Holder(address);
-					break;
-				default:
-					throw new Exception();
-			}
+			family = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? AddressFamily.IPv4 : AddressFamily.IPv6;
+			ip = new IPHolder(address);
+			this.port = port;
+		}
+		public STUNAttr_MappedAddress(IPHolder ip, ushort port) {
+			family = ip.isIPv4 ? AddressFamily.IPv4 : AddressFamily.IPv6;
+			this.ip = ip;
 			this.port = port;
 		}
 
@@ -46,12 +41,7 @@ namespace STUN.Message.Attributes {
 			buffer.Put((byte) family);
 			buffer.Put((ushort) port);
 
-			if (AddressFamily.IPv4 == family) {
-				ipv4.Write(ref buffer);
-			}
-			else {
-				ipv6.Write(ref buffer);
-			}
+			ip.Write(ref buffer);
 
 			buffer.Pad4();
 		}
@@ -62,12 +52,7 @@ namespace STUN.Message.Attributes {
 			family = (AddressFamily) buffer.GetByte();
 			port = buffer.GetUShort();
 
-			if (AddressFamily.IPv4 == family) {
-				ipv4.Read(ref buffer);
-			}
-			else {
-				ipv6.Read(ref buffer);
-			}
+			ip.Read(ref buffer, family == AddressFamily.IPv4);
 		}
 
 		public bool isIPv4() {
@@ -75,14 +60,18 @@ namespace STUN.Message.Attributes {
 		}
 
 		public IPEndPoint ToIPEndPoint() {
-			return new IPEndPoint(isIPv4() ? ipv4.ToIPAddress() : ipv6.ToIPAddress(), port);
+			return new IPEndPoint(ip.ToIPAddress(), port);
+		}
+
+		public IPEndPointStruct ToIPEndPointStruct() {
+			return new IPEndPointStruct(ip, port);
 		}
 
 		public override string ToString() {
 			var s = new System.Text.StringBuilder();
 			s.Append("TYPE=").Append(TYPE).Append("\n");
 			s.Append("Family: ").Append(family).Append("\n");
-			s.Append("IP: ").Append(isIPv4() ? ipv4.ToIPAddress().ToString() : ipv6.ToIPAddress().ToString()).Append("\n");
+			s.Append("IP: ").Append(ip.ToIPAddress().ToString()).Append("\n");
 			s.Append("Port: ").Append(port).Append("\n");
 			return s.ToString();
 		}

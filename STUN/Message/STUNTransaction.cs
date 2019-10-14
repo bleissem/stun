@@ -2,7 +2,7 @@ using BBuffer;
 using System;
 
 namespace STUN.Message {
-	public struct Transaction {
+	public struct Transaction : IEquatable<Transaction> {
 		/// <summary>lsb</summary>
 		public byte b0;
 		public byte b1;
@@ -18,7 +18,7 @@ namespace STUN.Message {
 		/// <summary>msb</summary>
 		public byte b11;
 
-		public int Length { get { return 12; } }
+		public const ushort Length = 12;
 
 		public Transaction(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8, byte b9, byte b10, byte b11) {
 			this.b0 = b0;
@@ -137,6 +137,21 @@ namespace STUN.Message {
 				if (i < 11) s.Append(":");
 			}
 			return s.ToString();
+		}
+
+		public bool Equals(Transaction other) {
+			return b0 == other.b0 &&
+				b1 == other.b1 &&
+				b2 == other.b2 &&
+				b3 == other.b3 &&
+				b4 == other.b4 &&
+				b5 == other.b5 &&
+				b6 == other.b6 &&
+				b7 == other.b7 &&
+				b8 == other.b8 &&
+				b9 == other.b9 &&
+				b10 == other.b10 &&
+				b11 == other.b11;
 		}
 	}
 }

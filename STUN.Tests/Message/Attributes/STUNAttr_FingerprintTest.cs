@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using STUN.Crypto;
 using STUN.Message.Enums;
 using System.Collections.Generic;
 
@@ -29,7 +28,7 @@ namespace STUN.Message.Attributes {
 			CollectionAssert.AreEqual(reference, stunReq.ToArray());
 
 			var attrs = new List<STUNAttr>();
-			var parsed = new STUNMessageParser(stunReq, attrs);
+			var parsed = new STUNMessageParser(stunReq, false, attrs);
 			int fingerprintIndex = STUNMessageParser.AttributeLastIndexOf(attrs, STUNAttribute.FINGERPRINT);
 			Assert.AreEqual(4, fingerprintIndex);
 			fingerprintIndex = STUNMessageParser.AttributeIndexOf(attrs, STUNAttribute.FINGERPRINT);
